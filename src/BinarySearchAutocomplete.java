@@ -99,19 +99,32 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	
 	@Override
 	public List<Term> topMatches(String prefix, int k) {
-		Term dummy = new Term(prefix,0);
+		Term dummy = new Term(prefix, 0);
 		PrefixComparator comp = PrefixComparator.getComparator(prefix.length());
 		int first = firstIndexOf(myTerms, dummy, comp);
 		int last = lastIndexOf(myTerms, dummy, comp);
-
-		if (first == -1) {               // prefix not found
+		if (first == -1 || k == 0) {
 			return new ArrayList<>();
 		}
 
-		// write code here for P5 assignment
-
-		return null;
-	
+		PriorityQueue<Term> pq = new PriorityQueue<Term>(Comparator.comparing(Term::getWeight));
+		for (int i = first ; i <= last; i++) {
+			if (pq.size() < k) {
+				pq.add(myTerms[i]);
+			}
+			else {
+				if (pq.peek().getWeight() < myTerms[i].getWeight() ) {
+					pq.remove();
+					pq.add(myTerms[i]);
+				}
+			}
+		}
+		int numResults = Math.min(k, pq.size());
+		LinkedList<Term> ret = new LinkedList<>();
+		while (pq.size() != 0) {
+			ret.addFirst(pq.remove());
+		}
+		return ret;
 	}
 
 	@Override
